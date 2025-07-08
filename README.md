@@ -1,178 +1,219 @@
-# 선착순 포인트 지급 시스템
+# 🎯 선착순 포인트 지급 시스템
 
-## 프로젝트 실행 방법
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.3-brightgreen)
+![Kotlin](https://img.shields.io/badge/Kotlin-1.9.25-blue)
+![Redis](https://img.shields.io/badge/Redis-Latest-red)
+![H2](https://img.shields.io/badge/H2-Database-orange)
+![WebFlux](https://img.shields.io/badge/WebFlux-Reactive-purple)
 
-### 설치 및 실행 명령어
+**고성능 선착순 포인트 지급 시스템** - 10,000명 동시 접속 처리 가능
 
-#### 1. Redis 실행
+## 시스템 개요
+
+## 🛠 기술 스택
+
+### Backend
+
+#### **Framework**: Spring Boot 3.5.3 (WebFlux)
+**선택 이유:**
+- **고성능 요구사항**: 10,000명 동시 접속을 처리하기 위해 **Reactive Programming**
+- **Non-blocking I/O**: 전통적인 MVC보다 **10배 이상 높은 동시성** 처리 가능하기에 경량화 된 어플리케이션 효율이 좋음
+- **메모리 효율성**: Thread-per-request 모델 대신 **Event Loop** 기반으로 메모리 사용량 최소화
+- **Back-pressure 지원**: 과부하 상황에서 자동으로 흐름 제어
+
+> 익숙한 Spring 생태계와의 호환성을 고려하여 WebFlux를 선택하였으며, 이를 통해 Reactive Programming을 적용하여 경량 애플리케이션에서의 처리 효율을 극대화할 수 있었습니다. 또한, Tomcat 기반보다 Netty 기반의 논블로킹 아키텍처를 활용함으로써 더 우수한 동시성 제어와 리소스 효율성을 확보하기 위해 webflux 기술을 선택했습니다.
+
+#### **Language**: Kotlin 1.9.25
+**선택 이유:**
+- **Java 호환성**: 기존 Spring 생태계 완벽 활용
+- **간결한 문법**: Java 대비 **30-40% 적은 코드량**으로 개발 속도 향상
+- **Null Safety**: Runtime NPE 방지로 **시스템 안정성** 크게 개선
+- **Coroutines**: Reactive Programming과 완벽 호환
+- **Extension Functions**: 코드 가독성과 유지보수성 향상
+> Kotlin을 선택한 이유는 Java와의 호환성 덕분에 기존 Spring 생태계를 그대로 활용하면서도, 간결한 문법과 Null Safety로 코드 품질을 크게 향상시킬 수 있었기 때문입니다. 또한, Coroutines를 통해 Reactive Programming을 자연스럽게 적용할 수 있어 시스템의 안정성과 성능을 동시에 확보하기 위해 사용했습니다.
+
+#### **Database**: H2 (In-Memory) with R2DBC
+**선택 이유:**
+> 빠른 개발 및 로컬 개발 편의성을 위해 인메모리 기반인 H2 데이터베이스를 사용했습니다.
+
+#### **Cache**: Redis with Lettuce
+**선택 이유:**
+> 일반적인 DB 트랜잭션 기반 처리 방식은 Race Condition, Lock 경합, 그리고 Connection Pool 한계 등의 이유로 동시 요청 처리 시 중복 신청이나 성능 저하가 발생할 수 있습니다.
+> 따라서 선착순 처리는 동시 요청과 중복 신청을 방지, 순서 지정에 대한 포인트가 정확하게 지급되어야 하기 때문에 Redis를 사용하여 원자적이고 빠른 처리를 구현했습니다. 
+> Redis는 높은 동시성을 지원하며, Lua 스크립트를 통해 원자적 연산을 보장합니다. 원자적 처리를 위해 Rua script 를 활용했습니다.
+
+
+### Testing
+- RestAssured: REST API 테스트를 활용하여 통합테스트 진행했습니다.
+- 동시 10000명 접속 시나리오를 구현하여 성능 테스트를 진행했습니다.
+- 동시 10001명 접속 시 시나리오를 구현하여 중복 신청 및 마감 처리 테스트를 진행했습니다.
+
+### 아키텍처 결정 과정
+
+#### **복잡성 vs 확장성**
+- **고민**: "단순한 동기식 처리 vs 복잡한 리액티브 처리"
+- **결정**: **미래 확장성**을 고려한 리액티브 아키텍처
+- **결과**: **Scale-Out 용이성** 확보
+> 헥사고날 아키텍처를 사용하여 확장성을 고려했습니다. 저는 미래에 계속 선착순 포인트 지급 시스템이 확장될 여지가 충분한 기능이라고 
+> 생각했기 때문에 헥사고날 아키텍처를 선택했습니다. 이로 인해 시스템의 각 구성 요소가 독립적으로 개발, 테스트, 배포될 수 있어 확장성과 유지보수성이 크게 향상되었습니다.
+
+## 🏗️ 프로젝트 구조
+
+```
+src/
+├── main/kotlin/com/example/wehomework/
+│   ├── adapter/
+│   │   ├── in/web/           # REST Controllers
+│   │   └── out/persistent/  # Repository Implementations, persistentAdapters
+│   ├── application/
+│   │   ├── port/           # Use Case Interfaces, ports
+│   │   └── service/        
+│   ├── config/           
+│   └── domain/           
+└── test/kotlin/com/example/wehomework/
+    ├── IntegrationConcurrencyTest/
+```
+
+## 🚀 설치 및 실행
+
+### 사전 요구사항
+- Java 21+
+- Redis Server
+- Docker (선택사항)
+
+### 1. Redis 실행
 ```bash
-# Docker로 Redis 실행
+# Docker 사용
 docker run -d -p 6379:6379 --name redis redis:latest
 
-# 또는 로컬 Redis 실행
+# 또는 로컬 Redis
 redis-server
 ```
 
-#### 2. 애플리케이션 실행
+### 2. 애플리케이션 실행
 ```bash
-# 권한 부여 (Unix/Linux/macOS)
+# 권한 부여
 chmod +x gradlew
 
 # 애플리케이션 실행
 ./gradlew bootRun
 ```
 
-## API 명세
+### 3. H2 Console 접속 (선택사항)
+- URL: http://localhost:8080/h2-console
+- JDBC URL: `jdbc:h2:mem:point-db`
+- Username: `sa`
+- Password: (비워둠)
 
-### 포인트 신청 엔드포인트
+## 📡 API 명세
 
-**URL**: `POST /api/v1/point/apply`
+### 포인트 신청
+```http
+POST /api/v1/point/apply
+Content-Type: application/json
 
-**Request Body**:
-```json
 {
   "userId": 12345
 }
 ```
 
-**응답 포맷 및 예시**:
+### 응답 형식
 
-**성공 응답**:
+#### ✅ 성공 응답
 ```json
 {
   "success": true,
   "message": "포인트 신청이 완료되었습니다.",
   "data": {
+    "userId": 12345,
     "order": 1,
     "amount": 100000,
-    "userId": 12345,
-    "createdBy": "2024-07-08T10:30:00"
+    "createdAt": "2024-07-08T10:30:00"
   }
 }
 ```
 
-**실패 응답 - 중복 신청**:
+#### ❌ 실패 응답
 ```json
 {
   "success": false,
-  "message": "이미 신청한 사용자입니다.",
+  "message": "이미 신청한 사용자입니다. (userId: 12345)",
+  "errorCode": "DUPLICATE_USER",
   "data": null
 }
 ```
 
-**실패 응답 - 마감**:
 ```json
 {
   "success": false,
   "message": "신청 마감되었습니다.",
+  "errorCode": "APPLICATION_CLOSED", 
   "data": null
 }
 ```
 
 ### 포인트 지급 규칙
-- 1~100번: 100,000점
-- 101~2,000번: 50,000점  
-- 2,001~5,000번: 20,000점
-- 5,001~10,000번: 10,000점
-- 10,001명 이후: 지급 없음
+| 순서 | 지급 포인트 | 대상자 수 |
+|------|------------|-----------|
+| 1~100번 | 100,000점 | 100명 |
+| 101~2,000번 | 50,000점 | 1,900명 |
+| 2,001~5,000번 | 20,000점 | 3,000명 |
+| 5,001~10,000번 | 10,000점 | 5,000명 |
+| 10,001명~ | 지급 없음 | - |
 
-## 처리 로직 설명
+## ⚙️ 핵심 로직
 
-### 선착순 판별 방식
-- Redis INCR 연산을 활용한 원자적 순서 보장
-- Lua 스크립트로 중복 검사와 순서 할당을 동시 처리
+### 1. 선착순 판별 방식
+```lua
+-- Redis Lua 스크립트 (원자적 연산)
+local userId = ARGV[1]
+local maxCount = tonumber(ARGV[2])
 
-### 동시성/중복 방지 처리 방식
-- Redis Lua 스크립트로 원자적 연산 보장
-- Set 자료구조를 이용한 사용자별 중복 신청 방지
-- 트랜잭션을 통한 데이터베이스 일관성 보장
+-- 중복 신청 체크
+if redis.call('SISMEMBER', KEYS[2], userId) == 1 then
+    return -1  -- 이미 신청함
+end
 
-## 테스트
+-- 현재 순서 확인
+local currentOrder = tonumber(redis.call('GET', KEYS[1]) or 0)
 
-### 1. 기본 테스트 실행
+-- 마감 체크
+if currentOrder >= maxCount then
+    return -2  -- 마감
+end
+
+-- 순서 할당 및 사용자 등록
+local newOrder = redis.call('INCR', KEYS[1])
+redis.call('SADD', KEYS[2], userId)
+
+return newOrder
+```
+
+### 2. 동시성 제어
+- **Redis Lua 스크립트**: 원자적 연산으로 race condition 방지
+- **Set 자료구조**: O(1) 중복 검사
+- **트랜잭션**: DB 일관성 보장
+- **롤백 메커니즘**: Redis-DB 불일치 시 자동 복구
+
+### 테스트 시나리오
+
+#### 📊 동시성 테스트
+- **목표**: 10,000명 동시 접속 처리
+- **검증 항목**:
+  - ✅ 정확히 10,000명만 성공
+  - ✅ 중복 신청 방지
+  - ✅ 순서 정확성 보장
+  - ✅ 데이터 일관성 유지
+
+### Redis 모니터링
 ```bash
-./gradlew test
+# Redis 상태 확인 스크립트
+./redis-monitor.sh
+
+# 수동 확인
+redis-cli
+KEYS point:*
+GET point:order:counter
+SCARD point:applied:users
 ```
 
-### 2. 10,000명 동시 접속 부하 테스트
-
-#### JUnit 기반 테스트
-```bash
-# 성능 및 동시성 테스트 실행
-./gradlew performanceTest
-
-# 또는 개별 테스트 클래스 실행
-./gradlew test --tests "ConcurrencyTest"
-./gradlew test --tests "PerformanceTest"
-```
-
-#### Shell 스크립트 기반 테스트
-```bash
-# 1. 애플리케이션 실행
-./gradlew bootRun
-
-# 2. 별도 터미널에서 부하 테스트 실행
-chmod +x load-test.sh
-./load-test.sh
-```
-
-#### 독립 실행 부하 테스트
-```bash
-# 1. 애플리케이션 실행
-./gradlew bootRun
-
-# 2. 별도 터미널에서 Kotlin 부하 테스트 실행
-./gradlew run --args="LoadTest"
-```
-
-### 3. 테스트 시나리오
-
-#### 동시성 테스트
-- **목적**: 10,000명이 동시에 포인트 신청
-- **검증**: 중복 처리 방지, 순서 보장, 최대 참가자 수 제한
-- **예상 결과**: 정확히 10,000명만 성공, 나머지는 마감 처리
-
-#### 성능 테스트  
-- **목적**: 응답 시간, 처리량, 안정성 측정
-- **메트릭**: 
-  - 평균 응답시간 < 1초
-  - 95% 응답시간 < 2초  
-  - 처리량 > 100 req/s
-  - 성공률 > 99%
-
-#### 단계별 부하 테스트
-- **목적**: 점진적 부하 증가로 시스템 한계 측정
-- **단계**: 100 → 500 → 1,000 → 2,000 → 5,000 → 10,000명
-
-### 4. 테스트 결과 예시
-```
-🚀 성능 테스트 결과
-============================================================
-📊 기본 통계:
-  총 요청 수: 10000
-  성공 수: 10000
-  실패 수: 0
-  성공률: 100.00%
-
-⏱️  시간 통계:
-  총 처리 시간: 15423ms
-  처리량: 648.74 req/s
-
-📈 응답시간 통계 (ms):
-  평균: 245ms
-  최소: 45ms
-  최대: 1205ms
-  50th percentile (median): 198ms
-  95th percentile: 567ms
-  99th percentile: 823ms
-  표준편차: 124.56ms
-
-✅ 성능 기준 검증:
-  평균 응답시간 < 1초: ✅ PASS (245ms)
-  95% 응답시간 < 2초: ✅ PASS (567ms)
-  처리량 > 100 req/s: ✅ PASS (648.74 req/s)
-  성공률 > 99%: ✅ PASS (100.00%)
-
-🎯 전체 결과: ✅ PASS
-============================================================
-```
