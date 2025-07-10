@@ -45,7 +45,6 @@ class ApplyPointService(
     private fun rollbackOnFailure(userId: Long, order: Long, originalError: Throwable): Mono<ApplyPointResult> {
         return pointOrderCounterPort.rollbackUserApplication(userId, order)
             .doOnNext { rollbackSuccess ->
-                // 로깅 최소화
                 if (!rollbackSuccess) {
                     logger.error("Rollback failed: userId=$userId, order=$order")
                 }

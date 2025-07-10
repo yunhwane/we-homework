@@ -33,7 +33,6 @@ class RedisPointOrderCounterRepository(
         const val USER_SET_KEY = "point:applied:users"
         const val MAX_PARTICIPANTS = 10_000L
 
-        // 극한 최적화된 Lua 스크립트
         private val APPLY_SCRIPT = RedisScript.of<Long>("""
             local userId = ARGV[1]
             local maxCount = tonumber(ARGV[2])

@@ -18,7 +18,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler(DuplicateUserException::class)
     fun handleDuplicateUserException(ex: DuplicateUserException): Mono<ResponseEntity<ErrorResponse>> {
         return Mono.just(
-            ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(
                     ErrorResponse(
                         success = false,
