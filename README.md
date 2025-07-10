@@ -98,13 +98,6 @@ src/
 docker-compose exec redis redis-cli
 ```
 
-### 동시성 테스트 코드 실행
-
-```bash
-# Gradle 빌드 및 테스트 실행
-./gradlew test --tests "com.example.wehomework.IntegrationConcurrencyTest"
-```
-
 ## 📡 API 명세
 
 ### 포인트 신청
@@ -202,7 +195,6 @@ return newOrder
 - **검증 항목**:
   - ✅ 정확히 10,000명만 성공
   - ✅ 중복 신청 방지
-  - ✅ 순서 정확성 보장
   - ✅ 데이터 일관성 유지
 
 ### Redis 모니터링
