@@ -112,7 +112,7 @@ Content-Type: application/json
 
 ### 응답 형식
 
-#### ✅ 성공 응답
+#### ✅ 성공 응답 200 OK
 ```json
 {
   "success": true,
@@ -127,6 +127,7 @@ Content-Type: application/json
 ```
 
 #### ❌ 실패 응답
+- 409 CONFILT
 ```json
 {
   "success": false,
@@ -136,11 +137,22 @@ Content-Type: application/json
 }
 ```
 
+- 400 BAD_REQUEST
 ```json
 {
   "success": false,
   "message": "신청 마감되었습니다.",
   "errorCode": "APPLICATION_CLOSED", 
+  "data": null
+}
+```
+
+- 500 INTERNAL_SERVER_ERROR
+```json
+{
+  "success": false,
+  "message": "서버 내부 오류가 발생했습니다.",
+  "errorCode": "INTERNAL_SERVER_ERROR", 
   "data": null
 }
 ```
