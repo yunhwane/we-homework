@@ -69,7 +69,7 @@ class IntegrationTest : AbstractTestContainersIntegrationTest() {
     }
 
     @Test
-    fun `RestAssured로 10,000명 동시 신청 테스트`() {
+    fun `10,000명 동시 신청 테스트`() {
         // Given
         val userIds = (1..TOTAL_USERS).map { it }
         val executor = Executors.newFixedThreadPool(CONCURRENCY)
