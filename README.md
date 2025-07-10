@@ -3,7 +3,7 @@
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.3-brightgreen)
 ![Kotlin](https://img.shields.io/badge/Kotlin-1.9.25-blue)
 ![Redis](https://img.shields.io/badge/Redis-Latest-red)
-![H2](https://img.shields.io/badge/H2-Database-orange)
+![MySQL](https://img.shields.io/badge/MySQL-Database-blue)
 ![WebFlux](https://img.shields.io/badge/WebFlux-Reactive-purple)
 
 **고성능 선착순 포인트 지급 시스템** - 10,000명 동시 접속 처리 가능
