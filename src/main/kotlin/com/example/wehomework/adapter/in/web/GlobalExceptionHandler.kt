@@ -45,21 +45,6 @@ class GlobalExceptionHandler {
         )
     }
 
-    @ExceptionHandler(MaxParticipantsExceededException::class)
-    fun handleMaxParticipantsExceededException(ex: MaxParticipantsExceededException): Mono<ResponseEntity<ErrorResponse>> {
-        return Mono.just(
-            ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(
-                    ErrorResponse(
-                        success = false,
-                        message = ex.message ?: "최대 참가자 수를 초과했습니다.",
-                        errorCode = "MAX_PARTICIPANTS_EXCEEDED",
-                        data = null
-                    )
-                )
-        )
-    }
-
     @ExceptionHandler(PointException::class)
     fun handlePointException(ex: PointException): Mono<ResponseEntity<ErrorResponse>> {
         return Mono.just(

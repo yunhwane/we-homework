@@ -22,21 +22,18 @@ class ApplyPointService(
 
     private val logger = LoggerFactory.getLogger(ApplyPointService::class.java)
 
-    companion object {
-        private const val MAX_PARTICIPANTS = 10_000L
-    }
 
     override fun apply(command: ApplyPointCommand): Mono<ApplyPointResult> {
         return pointOrderCounterPort.getOrderAndMarkUser(command.userId)
             .flatMap { order ->
-                pointErrorHandler.handleOrderResult(order, command.userId, MAX_PARTICIPANTS) { validOrder ->
+                pointErrorHandler.handleOrderResult(order, command.userId) { validOrder ->
                     applyOrder(command, validOrder)
                         .onErrorResume { dbError ->
                             rollbackOnFailure(command.userId, validOrder, dbError)
                         }
                 }
             }
-            .timeout(Duration.ofSeconds(10))  // 타임아웃 늘림
+            .timeout(Duration.ofSeconds(10))
             .doOnError { error ->
                 logger.error("Unexpected error for userId=${command.userId}", error)
             }

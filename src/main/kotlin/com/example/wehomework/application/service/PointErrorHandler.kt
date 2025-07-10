@@ -17,8 +17,8 @@ class PointErrorHandler {
         private const val APPLICATION_CLOSED_CODE = -2L
     }
     
-    fun <T> handleOrderResult(order: Long, userId: Long, maxParticipants: Long, onSuccess: (Long) -> Mono<T>): Mono<T> {
-        logger.debug("Handling order result: order={}, userId={}, maxParticipants={}", order, userId, maxParticipants)
+    fun <T> handleOrderResult(order: Long, userId: Long, onSuccess: (Long) -> Mono<T>): Mono<T> {
+        logger.debug("Handling order result: order={}, userId={}", order, userId)
         
         return when {
             order == DUPLICATE_USER_CODE -> {
@@ -28,10 +28,6 @@ class PointErrorHandler {
             order == APPLICATION_CLOSED_CODE -> {
                 logger.warn("Application closed: userId={}", userId)
                 Mono.error(ApplicationClosedException())
-            }
-            order > maxParticipants -> {
-                logger.warn("Max participants exceeded: order={}, maxParticipants={}, userId={}", order, maxParticipants, userId)
-                Mono.error(MaxParticipantsExceededException(order, maxParticipants))
             }
             order <= 0 -> {
                 logger.error("Invalid order value: order={}, userId={}", order, userId)
