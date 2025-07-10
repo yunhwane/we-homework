@@ -50,7 +50,7 @@ services:
       redis:
         condition: service_healthy
     environment:
-      - SPRING_PROFILES_ACTIVE=test
+      - SPRING_PROFILES_ACTIVE=default
       - SPRING_R2DBC_HOST=mysql-container-1
       - SPRING_R2DBC_PORT=3306
       - SPRING_R2DBC_DATABASE=point_db

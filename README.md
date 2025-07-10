@@ -81,29 +81,29 @@ src/
 - Redis Server
 - Docker (선택사항)
 
-### 1. Redis 실행
+### Docker 환경 실행
 ```bash
-# Docker 사용
-docker run -d -p 6379:6379 --name redis redis:latest
+# app 시작
+    docker compose up -d
+    
+# 실행 상태 확인
+    docker compose ps
 
-# 또는 로컬 Redis
-redis-server
+# 로그 확인
+    docker compose logs -f 
 ```
 
-### 2. 애플리케이션 실행
-```bash
-# 권한 부여
-chmod +x gradlew
-
-# 애플리케이션 실행
-./gradlew bootRun
+### Redis CLI 설치 및 실행
+``` bash 
+docker-compose exec redis redis-cli
 ```
 
-### 3. H2 Console 접속 (선택사항)
-- URL: http://localhost:8080/h2-console
-- JDBC URL: `jdbc:h2:mem:point-db`
-- Username: `sa`
-- Password: (비워둠)
+### 동시성 테스트 코드 실행
+
+```bash
+# Gradle 빌드 및 테스트 실행
+./gradlew test --tests "com.example.wehomework.IntegrationConcurrencyTest"
+```
 
 ## 📡 API 명세
 
