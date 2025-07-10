@@ -3,20 +3,16 @@ server:
 
 spring:
   r2dbc:
-    url: r2dbc:h2:mem:///point-db?options=DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
+    url: r2dbc:mysql://${SPRING_R2DBC_HOST:localhost}:${SPRING_R2DBC_PORT:3306}/${SPRING_R2DBC_DATABASE:point_db}
+    username: ${SPRING_R2DBC_USERNAME:root}
+    password: ${SPRING_R2DBC_PASSWORD:rootpassword}
     pool:
       initial-size: 20
       max-size: 80
       max-idle-time: 30m
       validation-query: SELECT 1
       max-acquire-time: 3s
-  
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+      max-create-connection-time: 5s
   
   data:
     redis:
@@ -30,8 +26,14 @@ spring:
           min-idle: 10
           max-wait: 3000ms
 
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
 logging:
   level:
     com.example.wehomework: INFO
+    io.r2dbc.mysql: WARN
     org.springframework.r2dbc: WARN
-    org.springframework.data.redis: WARN
+    org.springframework.data.r2dbc: INFO

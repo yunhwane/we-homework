@@ -1,19 +1,32 @@
 spring:
   r2dbc:
-    url: r2dbc:h2:mem:///testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
-    username: sa
-    password:
+    url: r2dbc:mysql://${SPRING_R2DBC_HOST:localhost}:${SPRING_R2DBC_PORT:3306}/${SPRING_R2DBC_DATABASE:point_db}
+    username: ${SPRING_R2DBC_USERNAME:root}
+    password: ${SPRING_R2DBC_PASSWORD:rootpassword}
+    pool:
+      initial-size: 10
+      max-size: 50
+      max-idle-time: 30m
+      validation-query: SELECT 1
+      max-acquire-time: 3s
+      
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
       timeout: 3000ms
       lettuce:
         pool:
           max-active: 50
           max-idle: 20
 
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
 logging:
   level:
     com.example.wehomework: DEBUG
+    io.r2dbc.mysql: DEBUG
     org.springframework.r2dbc: DEBUG

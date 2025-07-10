@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
 import java.time.Duration
-import java.util.concurrent.TimeoutException
 
 @Service
 class ApplyPointService(

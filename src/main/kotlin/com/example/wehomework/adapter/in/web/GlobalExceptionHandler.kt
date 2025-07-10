@@ -13,6 +13,8 @@ import reactor.core.publisher.Mono
 @RestControllerAdvice
 class GlobalExceptionHandler {
 
+    private val log = org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
+
     @ExceptionHandler(DuplicateUserException::class)
     fun handleDuplicateUserException(ex: DuplicateUserException): Mono<ResponseEntity<ErrorResponse>> {
         return Mono.just(
@@ -75,6 +77,7 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception::class)
     fun handleGenericException(ex: Exception): Mono<ResponseEntity<ErrorResponse>> {
+        log.info("Unhandled exception occurred: {}", ex.message, ex)
         return Mono.just(
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(
